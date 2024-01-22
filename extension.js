@@ -926,6 +926,8 @@ class ClipboardIndicator extends PanelMenu.Button {
   
   _performActionAfterCopy(text) {
     let action = ACTION_AFTER_COPY;
+    // base64 encode text
+    text = GLib.base64_encode(text);
     // replace %TEXT% with the copied 
     action = action.replace(/%TEXT%/g, text);
     GLib.spawn_command_line_async(action);
