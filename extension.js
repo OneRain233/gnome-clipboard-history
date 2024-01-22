@@ -222,6 +222,19 @@ class ClipboardIndicator extends PanelMenu.Button {
     actionsBox.add(this.privateModeMenuItem);
     this._updatePrivateModeState();
 
+    this.copyActionToggleMenuItem = new PopupMenu.PopupSwitchMenuItem(
+      _('Do action after copying'),
+      ACTION_AFTER_COPY_TOGGLE,
+      { reactive: true },
+    );
+    this.copyActionToggleMenuItem.connect('toggled', () => {
+      this.settings.set_boolean(
+        SettingsFields.ACTION_AFTER_COPY_TOGGLE,
+        this.copyActionToggleMenuItem.state,
+      );
+    });
+    actionsBox.add(this.copyActionToggleMenuItem);
+
     const clearMenuItem = new PopupMenu.PopupBaseMenuItem();
     clearMenuItem.add_child(
       new St.Icon({
@@ -844,6 +857,9 @@ class ClipboardIndicator extends PanelMenu.Button {
 
     Clipboard.get_text(St.ClipboardType.CLIPBOARD, (_, text) => {
       this._processClipboardContent(text, true);
+      if (ACTION_AFTER_COPY_TOGGLE && !PRIVATE_MODE) {
+        this._performActionAfterCopy(text);
+      }
     });
   }
 
@@ -855,6 +871,9 @@ class ClipboardIndicator extends PanelMenu.Button {
     Clipboard.get_text(St.ClipboardType.PRIMARY, (_, text) => {
       const last = this.entries.last();
       text = this._processClipboardContent(text, false);
+      if (ACTION_AFTER_COPY_TOGGLE && !PRIVATE_MODE) {
+        this._performActionAfterCopy(text);
+      }
       if (
         last &&
         text &&
@@ -916,10 +935,6 @@ class ClipboardIndicator extends PanelMenu.Button {
           this._deleteEntryAndRestoreLatest(this.currentlySelectedEntry),
         );
       });
-    }
-
-    if (ACTION_AFTER_COPY_TOGGLE) {
-      this._performActionAfterCopy(text);
     }
     return text;
   }
