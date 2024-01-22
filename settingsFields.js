@@ -14,5 +14,7 @@ const SettingsFields = {
   PRIVATE_MODE: 'private-mode',
   PASTE_ON_SELECTION: 'paste-on-selection',
   PROCESS_PRIMARY_SELECTION: 'process-primary-selection',
+  ACTION_AFTER_COPY_TOGGLE: 'action-after-copy-toggle',
+  ACTION_AFTER_COPY: 'action-after-copy',
 };
 export default SettingsFields;

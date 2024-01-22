@@ -60,6 +60,8 @@ let DISABLE_DOWN_ARROW;
 let STRIP_TEXT;
 let PASTE_ON_SELECTION;
 let PROCESS_PRIMARY_SELECTION;
+let ACTION_AFTER_COPY_TOGGLE;
+let ACTION_AFTER_COPY;
 
 class ClipboardIndicator extends PanelMenu.Button {
   _init(extension) {
@@ -916,7 +918,17 @@ class ClipboardIndicator extends PanelMenu.Button {
       });
     }
 
+    if (ACTION_AFTER_COPY_TOGGLE) {
+      this._performActionAfterCopy(text);
+    }
     return text;
+  }
+  
+  _performActionAfterCopy(text) {
+    let action = ACTION_AFTER_COPY;
+    // replace %TEXT% with the copied 
+    action = action.replace(/%TEXT%/g, text);
+    GLib.spawn_command_line_async(action);
   }
 
   _moveEntryFirst(entry) {
@@ -1105,6 +1117,12 @@ class ClipboardIndicator extends PanelMenu.Button {
     );
     PROCESS_PRIMARY_SELECTION = this.settings.get_boolean(
       SettingsFields.PROCESS_PRIMARY_SELECTION,
+    );
+    ACTION_AFTER_COPY_TOGGLE = this.settings.get_boolean(
+      SettingsFields.ACTION_AFTER_COPY_TOGGLE,
+    );
+    ACTION_AFTER_COPY = this.settings.get_string(
+      SettingsFields.ACTION_AFTER_COPY,
     );
   }
 

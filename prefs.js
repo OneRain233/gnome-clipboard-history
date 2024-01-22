@@ -60,6 +60,8 @@ export default class ClipboardHistoryPrefs extends ExtensionPreferences {
     const field_display_mode = new Gtk.ComboBox({
       model: this._create_display_mode_options(),
     });
+    const filed_action_after_copy_toggle = new Gtk.Switch();
+    const filed_action_after_copy = new Gtk.Entry();
 
     const rendererText = new Gtk.CellRendererText();
     field_display_mode.pack_start(rendererText, false);
@@ -179,6 +181,16 @@ export default class ClipboardHistoryPrefs extends ExtensionPreferences {
       hexpand: true,
       halign: Gtk.Align.START,
     });
+    const actionAfterCopyToggleLabel = new Gtk.Label({
+      label: _('Action after copy'),
+      hexpand: true,
+      halign: Gtk.Align.START,
+    });
+    const actionAfterCopyLabel = new Gtk.Label({
+      label: _('Action after copy'),
+      hexpand: true,
+      halign: Gtk.Align.START,
+    })
 
     const addRow = ((main) => {
       let row = 0;
@@ -218,6 +230,8 @@ export default class ClipboardHistoryPrefs extends ExtensionPreferences {
     addRow(confirmClearLabel, field_confirm_clear_toggle);
     addRow(keybindingLabel, field_keybinding_activation);
     addRow(null, field_keybinding);
+    addRow(actionAfterCopyToggleLabel, filed_action_after_copy_toggle);
+    addRow(actionAfterCopyLabel, filed_action_after_copy);
 
     settings.bind(
       Fields.HISTORY_SIZE,
@@ -301,6 +315,18 @@ export default class ClipboardHistoryPrefs extends ExtensionPreferences {
       Fields.ENABLE_KEYBINDING,
       field_keybinding_activation,
       'active',
+      Gio.SettingsBindFlags.DEFAULT,
+    );
+    settings.bind(
+      Fields.ACTION_AFTER_COPY_TOGGLE,
+      filed_action_after_copy_toggle,
+      'active',
+      Gio.SettingsBindFlags.DEFAULT,
+    );
+    settings.bind(
+      Fields.ACTION_AFTER_COPY,
+      filed_action_after_copy,
+      'text',
       Gio.SettingsBindFlags.DEFAULT,
     );
 

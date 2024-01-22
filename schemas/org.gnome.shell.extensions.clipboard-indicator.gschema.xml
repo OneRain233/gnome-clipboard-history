@@ -132,5 +132,19 @@
       <default><![CDATA[['<Super><Shift>P']]]></default>
       <summary>Toggle private mode</summary>
     </key>
+    <key name="action-after-copy-toggle" type="b">
+      <default>false</default>
+      <summary>Toggle action after copy</summary>
+      <description>
+        If true, the action after copy will executed
+      </description>
+    </key>
+    <key name="action-after-copy" type="s">
+      <default>"None"</default>
+      <summary>Action after copy</summary>
+      <description>
+        The action after copy will executed
+      </description>
+    </key>
   </schema>
 </schemalist>
