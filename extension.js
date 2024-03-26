@@ -86,7 +86,7 @@ class ClipboardIndicator extends PanelMenu.Button {
     });
     hbox.add_child(this._buttonText);
     this._downArrow = PopupMenu.arrowIcon(St.Side.BOTTOM);
-    hbox.add(this._downArrow);
+    hbox.add_child(this._downArrow);
     this.add_child(hbox);
 
     this._fetchSettings();
@@ -127,7 +127,7 @@ class ClipboardIndicator extends PanelMenu.Button {
       reactive: false,
       can_focus: false,
     });
-    entryItem.add(this.searchEntry);
+    entryItem.add_child(this.searchEntry);
     this.menu.addMenuItem(entryItem);
 
     this.menu.connect('open-state-changed', (self, open) => {
@@ -155,9 +155,9 @@ class ClipboardIndicator extends PanelMenu.Button {
       style_class: 'ci-history-menu-section',
       overlay_scrollbars: true,
     });
-    favoritesScrollView.add_actor(this.favoritesSection.actor);
+    favoritesScrollView.add_child(this.favoritesSection.actor);
 
-    this.scrollViewFavoritesMenuSection.actor.add_actor(favoritesScrollView);
+    this.scrollViewFavoritesMenuSection.actor.add_child(favoritesScrollView);
     this.menu.addMenuItem(this.scrollViewFavoritesMenuSection);
     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
@@ -169,9 +169,9 @@ class ClipboardIndicator extends PanelMenu.Button {
       style_class: 'ci-history-menu-section',
       overlay_scrollbars: true,
     });
-    this.historyScrollView.add_actor(this.historySection.actor);
+    this.historyScrollView.add_child(this.historySection.actor);
 
-    this.scrollViewMenuSection.actor.add_actor(this.historyScrollView);
+    this.scrollViewMenuSection.actor.add_child(this.historyScrollView);
 
     this.menu.addMenuItem(this.scrollViewMenuSection);
 
@@ -183,7 +183,7 @@ class ClipboardIndicator extends PanelMenu.Button {
       vertical: false,
     });
 
-    actionsSection.actor.add(actionsBox);
+    actionsSection.actor.add_child(actionsBox);
     this.menu.addMenuItem(actionsSection);
 
     const prevPage = new PopupMenu.PopupBaseMenuItem();
@@ -194,7 +194,7 @@ class ClipboardIndicator extends PanelMenu.Button {
       }),
     );
     prevPage.connect('activate', this._navigatePrevPage.bind(this));
-    actionsBox.add(prevPage);
+    actionsBox.add_child(prevPage);
 
     const nextPage = new PopupMenu.PopupBaseMenuItem();
     nextPage.add_child(
@@ -204,9 +204,9 @@ class ClipboardIndicator extends PanelMenu.Button {
       }),
     );
     nextPage.connect('activate', this._navigateNextPage.bind(this));
-    actionsBox.add(nextPage);
+    actionsBox.add_child(nextPage);
 
-    actionsBox.add(new St.BoxLayout({ x_expand: true }));
+    actionsBox.add_child(new St.BoxLayout({ x_expand: true }));
 
     this.privateModeMenuItem = new PopupMenu.PopupSwitchMenuItem(
       _('Private mode'),
@@ -219,7 +219,7 @@ class ClipboardIndicator extends PanelMenu.Button {
         this.privateModeMenuItem.state,
       );
     });
-    actionsBox.add(this.privateModeMenuItem);
+    actionsBox.add_child(this.privateModeMenuItem);
     this._updatePrivateModeState();
 
     this.copyActionToggleMenuItem = new PopupMenu.PopupSwitchMenuItem(
@@ -242,7 +242,7 @@ class ClipboardIndicator extends PanelMenu.Button {
         style_class: 'popup-menu-icon',
       }),
     );
-    actionsBox.add(clearMenuItem);
+    actionsBox.add_child(clearMenuItem);
 
     const settingsMenuItem = new PopupMenu.PopupBaseMenuItem();
     settingsMenuItem.add_child(
@@ -252,7 +252,7 @@ class ClipboardIndicator extends PanelMenu.Button {
       }),
     );
     settingsMenuItem.connect('activate', this._openSettings.bind(this));
-    actionsBox.add(settingsMenuItem);
+    actionsBox.add_child(settingsMenuItem);
 
     if (ENABLE_KEYBINDING) {
       this._bindShortcuts();
@@ -641,25 +641,28 @@ class ClipboardIndicator extends PanelMenu.Button {
       GLib.PRIORITY_DEFAULT,
       1, // Just post to the end of the event loop
       () => {
+        const SHIFT_L = 42;
+        const INSERT = 110;
+
         const eventTime = Clutter.get_current_event_time() * 1000;
-        VirtualKeyboard().notify_keyval(
+        VirtualKeyboard().notify_key(
           eventTime,
-          Clutter.KEY_Shift_L,
+          SHIFT_L,
           Clutter.KeyState.PRESSED,
         );
-        VirtualKeyboard().notify_keyval(
+        VirtualKeyboard().notify_key(
           eventTime,
-          Clutter.KEY_Insert,
+          INSERT,
           Clutter.KeyState.PRESSED,
         );
-        VirtualKeyboard().notify_keyval(
+        VirtualKeyboard().notify_key(
           eventTime,
-          Clutter.KEY_Insert,
+          INSERT,
           Clutter.KeyState.RELEASED,
         );
-        VirtualKeyboard().notify_keyval(
+        VirtualKeyboard().notify_key(
           eventTime,
-          Clutter.KEY_Shift_L,
+          SHIFT_L,
           Clutter.KeyState.RELEASED,
         );
 
@@ -1040,10 +1043,10 @@ class ClipboardIndicator extends PanelMenu.Button {
       return;
     }
 
-    this._notifSource = new MessageTray.Source(
-      this.extension.uuid,
-      INDICATOR_ICON,
-    );
+    this._notifSource = new MessageTray.Source({
+      title: this.extension.indicatorName,
+      iconName: INDICATOR_ICON,
+    });
     this._notifSource.connect('destroy', () => {
       this._notifSource = undefined;
     });
@@ -1063,22 +1066,26 @@ class ClipboardIndicator extends PanelMenu.Button {
 
     let notification;
     if (this._notifSource.count === 0) {
-      notification = new MessageTray.Notification(
-        this._notifSource,
+      notification = new MessageTray.Notification({
+        source: this._notifSource,
         title,
-        message,
-      );
+        body: message,
+        isTransient: true,
+      });
     } else {
       notification = this._notifSource.notifications[0];
-      notification.update(title, message, { clear: true });
+      notification.set({
+        title,
+        body: message,
+      });
+      notification.clearActions();
     }
 
     if (typeof transformFn === 'function') {
       transformFn(notification);
     }
 
-    notification.setTransient(true);
-    this._notifSource.showNotification(notification);
+    this._notifSource.addNotification(notification);
   }
 
   _updatePrivateModeState() {
