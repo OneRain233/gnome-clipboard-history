@@ -233,7 +233,7 @@ class ClipboardIndicator extends PanelMenu.Button {
         this.copyActionToggleMenuItem.state,
       );
     });
-    actionsBox.add(this.copyActionToggleMenuItem);
+    actionsBox.add_child(this.copyActionToggleMenuItem);
 
     const clearMenuItem = new PopupMenu.PopupBaseMenuItem();
     clearMenuItem.add_child(
